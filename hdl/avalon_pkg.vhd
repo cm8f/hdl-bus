@@ -46,6 +46,16 @@ PACKAGE avalon_pkg IS
   ALIAS t_avalonf_master_in   IS t_avalonf_slave_out;
   ALIAS t_avalonf_master_out  IS t_avalonf_slave_in;
 
+  TYPE t_avalonst_slave_in_matrix   IS ARRAY(NATURAL RANGE <>) OF t_avalonst_slave_in;
+  TYPE t_avalonst_slave_out_matrix  IS ARRAY(NATURAL RANGE <>) OF t_avalonst_slave_OUT;
+  TYPE t_avalonf_slave_in_matrix    IS ARRAY(NATURAL RANGE <>) OF t_avalonf_slave_in;
+  TYPE t_avalonf_slave_out_matrix   IS ARRAY(NATURAL RANGE <>) OF t_avalonf_slave_out;
+
+  ALIAS t_avalonst_master_in_matrix   IS t_avalonst_slave_out_matrix;
+  ALIAS t_avalonst_master_out_matrix  IS t_avalonst_slave_in_matrix;
+  ALIAS t_avalonf_master_in_matrix    IS t_avalonf_slave_out_matrix;
+  ALIAS t_avalonf_master_out_matrix   IS t_avalonf_slave_in_matrix;
+
   CONSTANT c_avalonf_slave_out_init : t_avalonf_slave_out := (
     readdata      => x"DEADDA7A",
     readdatavalid => '0',
