@@ -140,11 +140,30 @@ BEGIN
     WaitForClock(i_clock, 1);
 
     IF run("single_wr_single_rd") THEN
-      v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(123, v_val'LENGTH));
-      write_bus(net, bus_handle, 0, v_val);
-      WaitForClock(i_clock, 2);
-      read_bus(net, bus_handle, 0, v_tmp);
-      AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
+      FOR C IN 0 TO g_number_ports-1 LOOP 
+        Log(id, "Write/Read from slave " & TO_STRING(C));
+        v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(123 + C, v_val'LENGTH));
+        --        net   handle    addr  data
+        write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, v_val);
+        WaitForClock(i_clock, 2);
+        read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, v_tmp);
+        AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
+      END LOOP;
+
+    END IF;
+
+    IF run("single_wr_single_rd_burst") THEN
+      FOR C IN 0 TO g_number_ports-1 LOOP
+        Log(id, "Write/Read from slave 1");
+        FOR I IN 0 TO 3 LOOP
+          v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I+256, v_val'LENGTH));
+          --        net   handle    addr  data
+          write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + I*4, v_val);
+          WaitForClock(i_clock, 2);
+          read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + I*4, v_tmp);
+          AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
+        END LOOP;
+      END LOOP;
     END IF;
 
     ReportAlerts;
@@ -152,7 +171,7 @@ BEGIN
     check_equal(GetAlertCount, 0, "error occured");
     test_runner_cleanup(runner);
   END PROCESS;
-  test_runner_watchdog(runner, 20 us);
+  test_runner_watchdog(runner, 2 ms);
 
 
   --====================================================================
@@ -211,7 +230,7 @@ BEGIN
       )
       PORT MAP (
         clk           => i_clock,
-        address       => s_avalon_wr(I).address,
+        address       => s_avalon_wr(I).address(15 DOWNTO 2),
         byteenable    => s_avalon_wr(I).byteenable,
         burstcount    => s_avalon_wr(I).burstcount,
         write         => s_avalon_wr(I).write AND s_select(I),
