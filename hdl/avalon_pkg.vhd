@@ -10,7 +10,7 @@ PACKAGE avalon_pkg IS
   CONSTANT p_avl_mm_addr_width    : INTEGER := 32;
   CONSTANT p_avl_mm_data_width    : INTEGER := 32;
   CONSTANT p_avl_mm_be_width      : INTEGER := p_avl_mm_data_width/8;
-  CONSTANT p_avl_mm_burst_width   : INTEGER := 0;
+  CONSTANT p_avl_mm_burst_width   : INTEGER := 4;
 
   --! avalon stream type definition
   TYPE t_avalonst_slave_in IS RECORD
