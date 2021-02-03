@@ -46,24 +46,16 @@ def create_test_suite(prj, args):
                     )
                 )
 
-
-#    tb_ram_sp = lib.test_bench("tb_ram_sp")
-#
-#    addrw = [8, 9, 10]
-#    widths = [8, 16]
-#    oreg = [True, False]
-#    for test in tb_ram_sp.get_tests():
-#        for width in widths:
-#            for reg in oreg:
-#                for awidth in addrw:
-#                    test.add_config(
-#                        name="width=%d,depth=%d,reg=%s" %(width, 2<<(awidth-1), reg),
-#                        generics=dict(
-#                            g_addr_width=awidth,
-#                            g_width=width,
-#                            g_register=reg
-#                        )
-#                    )
+    tb_splitter = lib.test_bench("tb_avl_bus_splitter")
+    num_ports = range(2, 8)
+    for test in tb_splitter.get_tests():
+        for num in num_ports:
+            test.add_config(
+                name="slaves=%d" % num,
+                generics=dict(
+                    g_number_ports = num
+                )
+            )
 
 
 if __name__ == "__main__":
