@@ -21,7 +21,7 @@ ENTITY tb_avl_bus_splitter IS
     g_master_write_high_prob  : REAL := 1.0;
     g_master_read_high_prob   : REAL := 1.0;
     -- slave config
-    g_slave_waitrequest_prob  : REAL := 0.5;
+    g_slave_waitrequest_prob  : REAL := 0.0;
     g_slave_readvalid_prob    : REAL := 0.5
   );
 END ENTITY;
@@ -124,7 +124,6 @@ BEGIN
   CreateClock(i_clock, c_period);
   CreateReset(i_reset, '1', i_clock, 10*c_period, 1 ns);
 
-  id <= GetAlertLogID(PathTail(tb_avl_bus_splitter'INSTANCE_NAME));
 
 
   --====================================================================
@@ -135,6 +134,10 @@ BEGIN
     VARIABLE v_tmp : STD_LOGIC_VECTOR(p_avl_mm_data_width-1 DOWNTO 0);
   BEGIN
     test_runner_setup(runner, runner_cfg);
+    id <= GetAlertLogID(PathTail(tb_avl_bus_splitter'INSTANCE_NAME));
+    WAIT FOR 0 ns;
+    SetLogEnable(PASSED, TRUE);
+
     WaitForLevel(i_reset, '1');
     WaitForLevel(i_reset, '0');
     WaitForClock(i_clock, 1);
@@ -154,10 +157,11 @@ BEGIN
 
     IF run("single_wr_single_rd_burst") THEN
       FOR C IN 0 TO g_number_ports-1 LOOP
-        Log(id, "Write/Read from slave 1");
+        Log(id, "Write/Read from slave " & TO_STRING(C));
         FOR I IN 0 TO 3 LOOP
           v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I+256, v_val'LENGTH));
           --        net   handle    addr  data
+          Log(id, "address " & TO_HSTRING(c_address_map(C) OR STD_LOGIC_VECTOR(TO_UNSIGNED(I*4, 32))));
           write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + I*4, v_val);
           WaitForClock(i_clock, 2);
           read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + I*4, v_tmp);
@@ -179,21 +183,21 @@ BEGIN
   --====================================================================
   inst_avl_master: ENTITY vunit_lib.avalon_master
     GENERIC MAP(
-      bus_handle      => bus_handle,
+      bus_handle              => bus_handle,
       write_high_probability  => 1.0,
       read_high_probability   => 1.0
     )
     PORT MAP(
-      clk               => i_clock,
-      address           => i_avalon_wr.address,
-      byteenable        => i_avalon_wr.byteenable,
-      burstcount        => i_avalon_wr.burstcount,
-      write             => i_avalon_wr.write,
-      writedata         => i_avalon_wr.writedata,
-      read              => i_avalon_wr.read,
-      readdata          => o_avalon_rd.readdata,
-      readdatavalid     => o_avalon_rd.readdatavalid,
-      waitrequest       => o_avalon_rd.waitrequest
+      clk                     => i_clock,
+      address                 => i_avalon_wr.address,
+      byteenable              => i_avalon_wr.byteenable,
+      burstcount              => i_avalon_wr.burstcount,
+      write                   => i_avalon_wr.write,
+      writedata               => i_avalon_wr.writedata,
+      read                    => i_avalon_wr.read,
+      readdata                => o_avalon_rd.readdata,
+      readdatavalid           => o_avalon_rd.readdatavalid,
+      waitrequest             => o_avalon_rd.waitrequest
     );
 
 
@@ -203,14 +207,14 @@ BEGIN
   --====================================================================
   inst_dut : ENTITY WORK.avl_bus_splitter
     GENERIC MAP (
-      g_number_ports      => g_number_ports,
-      g_compare_bit_upper => c_comp_upper_bit,
-      g_compare_bit_lower => c_comp_lower_bit,
-      g_address_map       => c_address_map(0 TO g_number_ports-1)
+      g_number_ports          => g_number_ports,
+      g_compare_bit_upper     => c_comp_upper_bit,
+      g_compare_bit_lower     => c_comp_lower_bit,
+      g_address_map           => c_address_map(0 TO g_number_ports-1)
     )
     PORT MAP (
-      i_clock           => i_clock,
-      i_reset           => i_reset,
+      i_clock                 => i_clock,
+      i_reset                 => i_reset,
       --
       i_slave_avalon_select   => '1',
       i_slave_avalon_wr       => i_avalon_wr,
@@ -226,19 +230,19 @@ BEGIN
   gen_avl_slaves : FOR i IN 0 TO g_number_ports-1 GENERATE
     inst_slvX: ENTITY vunit_lib.avalon_slave
       GENERIC MAP (
-        avalon_slave  => avalon_slave(I)
+        avalon_slave          => avalon_slave(I)
       )
       PORT MAP (
-        clk           => i_clock,
-        address       => s_avalon_wr(I).address(15 DOWNTO 2),
-        byteenable    => s_avalon_wr(I).byteenable,
-        burstcount    => s_avalon_wr(I).burstcount,
-        write         => s_avalon_wr(I).write AND s_select(I),
-        writedata     => s_avalon_wr(I).writedata,
-        read          => s_avalon_wr(I).read AND s_select(I),
-        readdata      => s_avalon_rd(I).readdata,
-        readdatavalid => s_avalon_rd(I).readdatavalid,
-        waitrequest   => s_avalon_rd(I).waitrequest
+        clk                   => i_clock,
+        address               => s_avalon_wr(I).address(15 DOWNTO 0),
+        byteenable            => s_avalon_wr(I).byteenable,
+        burstcount            => s_avalon_wr(I).burstcount,
+        write                 => s_avalon_wr(I).write AND s_select(I),
+        writedata             => s_avalon_wr(I).writedata,
+        read                  => s_avalon_wr(I).read AND s_select(I),
+        readdata              => s_avalon_rd(I).readdata,
+        readdatavalid         => s_avalon_rd(I).readdatavalid,
+        waitrequest           => s_avalon_rd(I).waitrequest
       );
   END GENERATE;
 
