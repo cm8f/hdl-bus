@@ -47,7 +47,7 @@ def create_test_suite(prj, args):
                 )
 
     tb_splitter = lib.test_bench("tb_avl_bus_splitter")
-    num_ports = range(2, 8)
+    num_ports = range(2, 15)
     for test in tb_splitter.get_tests():
         for num in num_ports:
             test.add_config(
