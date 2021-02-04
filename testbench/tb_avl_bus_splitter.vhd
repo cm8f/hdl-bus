@@ -132,6 +132,8 @@ BEGIN
   proc_stim: PROCESS
     VARIABLE v_val : STD_LOGIC_VECTOR(p_avl_mm_data_width-1 DOWNTO 0);
     VARIABLE v_tmp : STD_LOGIC_VECTOR(p_avl_mm_data_width-1 DOWNTO 0);
+    CONSTANT c_data_queue   : queue_t := new_queue;
+    CONSTANT c_rd_ref_queue : queue_t := new_queue;
   BEGIN
     test_runner_setup(runner, runner_cfg);
     id <= GetAlertLogID(PathTail(tb_avl_bus_splitter'INSTANCE_NAME));
@@ -168,6 +170,26 @@ BEGIN
           AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
         END LOOP;
       END LOOP;
+    END IF;
+
+    IF run("burst_wr_burst_rd") THEN
+      FOR C IN 0 TO g_number_ports-1 LOOP 
+        Log(id, "Write/Read from slave " & TO_STRING(C));
+        FOR I IN 0 TO 3 LOOP 
+          push(c_data_queue, STD_LOGIC_VECTOR(TO_UNSIGNED(C+I+1234, 32)));
+        END LOOP;
+        --        net   handle    addr  data
+        burst_write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
+        AffirmIf(id, is_empty(c_data_queue) = TRUE, "wr queue not flushed by master");
+        WaitForClock(i_clock, 2);
+        burst_read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
+        FOR I IN 0 TO 3 LOOP 
+          v_tmp := pop(c_data_queue);
+          AffirmIf(id, v_tmp = STD_LOGIC_VECTOR(TO_UNSIGNED(C+i+1234, 32)), "read error");
+        END LOOP;
+        AffirmIf(id, is_empty(c_data_queue) = TRUE, "rd queue not flushed by master");
+      END LOOP;
+
     END IF;
 
     ReportAlerts;
