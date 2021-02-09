@@ -12,7 +12,7 @@ pipeline {
         }
         stage("simulate") {
             steps {
-                sh 'rm -rf ./vunit_out *.txt *.xml ./ram/vunit_out ./ram/*.xml ./ram/*.txt ./fifo/vunit_out ./fifo/*.xml ./fifo/*.txt'
+                sh 'rm -rf ./vunit_out *.txt *.xml
                 sh 'python3 ./run.py -p6 -x output.xml --xunit-xml-format jenkins --exit-0 --no-color --cover 1 --clean'
             }
         }
