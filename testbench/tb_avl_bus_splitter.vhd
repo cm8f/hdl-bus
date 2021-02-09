@@ -33,20 +33,20 @@ ARCHITECTURE tb OF tb_avl_bus_splitter IS
   CONSTANT c_comp_lower_bit   : INTEGER := 16;
   CONSTANT c_address_map      : t_slv_matrix(0 TO 15)(31 DOWNTO 0) := (
                                                         0  => x"00000000",
-                                                        1  => x"00010000", 
-                                                        2  => x"00020000", 
-                                                        3  => x"00030000", 
-                                                        4  => x"00040000", 
-                                                        5  => x"00050000", 
-                                                        6  => x"00060000", 
-                                                        7  => x"00070000", 
-                                                        8  => x"00080000", 
-                                                        9  => x"00090000", 
-                                                        10 => x"000A0000", 
-                                                        11 => x"000B0000", 
-                                                        12 => x"000C0000", 
-                                                        13 => x"000D0000", 
-                                                        14 => x"000E0000", 
+                                                        1  => x"00010000",
+                                                        2  => x"00020000",
+                                                        3  => x"00030000",
+                                                        4  => x"00040000",
+                                                        5  => x"00050000",
+                                                        6  => x"00060000",
+                                                        7  => x"00070000",
+                                                        8  => x"00080000",
+                                                        9  => x"00090000",
+                                                        10 => x"000A0000",
+                                                        11 => x"000B0000",
+                                                        12 => x"000C0000",
+                                                        13 => x"000D0000",
+                                                        14 => x"000E0000",
                                                         15 => x"000F0000");
 
   SIGNAL i_clock      : STD_LOGIC;
@@ -76,7 +76,7 @@ ARCHITECTURE tb OF tb_avl_bus_splitter IS
   TYPE buffer_t_matrix IS ARRAY(0 TO g_number_ports-1) OF buffer_t;
   TYPE avalon_slave_t_matrix IS ARRAY(0 TO g_number_ports-1) OF avalon_slave_t;
 
-  IMPURE FUNCTION f_set_memory RETURN memory_t_matrix IS 
+  IMPURE FUNCTION f_set_memory RETURN memory_t_matrix IS
     VARIABLE v_tmp : memory_t_matrix;
   BEGIN
     FOR i IN 0 TO g_number_ports-1 LOOP
@@ -87,7 +87,7 @@ ARCHITECTURE tb OF tb_avl_bus_splitter IS
 
   CONSTANT memory       : memory_t_matrix := f_set_memory;
 
-  IMPURE FUNCTION f_set_buffer RETURN buffer_t_matrix IS 
+  IMPURE FUNCTION f_set_buffer RETURN buffer_t_matrix IS
     VARIABLE v_tmp : buffer_t_matrix;
   BEGIN
     FOR i IN 0 TO g_number_ports-1 LOOP
@@ -98,11 +98,11 @@ ARCHITECTURE tb OF tb_avl_bus_splitter IS
 
   CONSTANT buf          : buffer_t_matrix := f_set_buffer;
 
-  IMPURE FUNCTION f_set_avl_slaves RETURN avalon_slave_t_matrix IS 
+  IMPURE FUNCTION f_set_avl_slaves RETURN avalon_slave_t_matrix IS
     VARIABLE v_tmp : avalon_slave_t_matrix;
   BEGIN
     FOR i IN 0 TO g_number_ports-1 LOOP
-      v_tmp(I) := new_avalon_slave( 
+      v_tmp(I) := new_avalon_slave(
         memory => memory(I),
         name => "avl_slave" & to_string(I),
         readdatavalid_high_probability  => g_slave_readvalid_prob,
@@ -145,7 +145,7 @@ BEGIN
     WaitForClock(i_clock, 1);
 
     IF run("single_wr_single_rd") THEN
-      FOR C IN 0 TO g_number_ports-1 LOOP 
+      FOR C IN 0 TO g_number_ports-1 LOOP
         Log(id, "Write/Read from slave " & TO_STRING(C));
         v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(123 + C, v_val'LENGTH));
         --        net   handle    addr  data
@@ -173,17 +173,20 @@ BEGIN
     END IF;
 
     IF run("burst_wr_burst_rd") THEN
-      FOR C IN 0 TO g_number_ports-1 LOOP 
+      FOR C IN 0 TO g_number_ports-1 LOOP
         Log(id, "Write/Read from slave " & TO_STRING(C));
-        FOR I IN 0 TO 3 LOOP 
+        FOR I IN 0 TO 3 LOOP
           push(c_data_queue, STD_LOGIC_VECTOR(TO_UNSIGNED(C+I+1234, 32)));
         END LOOP;
         --        net   handle    addr  data
+        Log(id, "Write from slave " & TO_STRING(C));
         burst_write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
+        WaitForClock(i_clock, 5);
         AffirmIf(id, is_empty(c_data_queue) = TRUE, "wr queue not flushed by master");
         WaitForClock(i_clock, 2);
+        Log(id, "Read from slave " & TO_STRING(C));
         burst_read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
-        FOR I IN 0 TO 3 LOOP 
+        FOR I IN 0 TO 3 LOOP
           v_tmp := pop(c_data_queue);
           AffirmIf(id, v_tmp = STD_LOGIC_VECTOR(TO_UNSIGNED(C+i+1234, 32)), "read error");
         END LOOP;
