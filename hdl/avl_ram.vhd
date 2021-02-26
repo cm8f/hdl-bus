@@ -2,13 +2,12 @@ LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 
 LIBRARY WORK;
-USE WORK.global_pkg.ALL;
+USE WORK.avalon_pkg.ALL;
 
 ENTITY avl_ram IS
   GENERIC(
     g_addr_width    : INTEGER :=  8;
-    g_data_width    : INTEGER := 32;
-    g_true_dualport : BOOLEAN := FALSE
+    g_data_width    : INTEGER := 32
   );
   PORT(
     i_clock         : IN  STD_LOGIC;
@@ -25,14 +24,14 @@ ENTITY avl_ram IS
   );
 END ENTITY avl_ram;
 
-ARCHITECTURE rtl OF avalon_ram IS
+ARCHITECTURE rtl OF avl_ram IS
 
   SIGNAL r_waitrequest : STD_LOGIC;
   SIGNAL s_waitrequest : STD_LOGIC;
 
 BEGIN
 
-  inst_ram : ENTITY WORK.ram_dp
+  inst_ram : ENTITY WORK.ram_tdp
     GENERIC MAP(
       g_addr_width  => g_addr_width-2,
       g_data_width  => g_data_width
