@@ -18,7 +18,7 @@ ENTITY avl_ram IS
     --
     i_wrreq         : IN  STD_LOGIC := '0';
     i_rdreq         : IN  STD_LOGIC := '0';
-    i_addr          : IN  STD_LOGIC_VECTOR(g_addr_width-3 DOWNTO 0) := (OTHERS => '0');
+    i_addr          : IN  STD_LOGIC_VECTOR(g_addr_width-1 DOWNTO 0) := (OTHERS => '0');
     i_din           : IN  STD_LOGIC_VECTOR(g_data_width-1 DOWNTO 0) := (OTHERS => '0');
     o_dout          : OUT STD_LOGIC_VECTOR(g_data_width-1 DOWNTO 0)
   );
@@ -26,20 +26,17 @@ END ENTITY avl_ram;
 
 ARCHITECTURE rtl OF avl_ram IS
 
-  SIGNAL r_waitrequest : STD_LOGIC;
-  SIGNAL s_waitrequest : STD_LOGIC;
-
 BEGIN
 
   inst_ram : ENTITY WORK.ram_tdp
     GENERIC MAP(
-      g_addr_width  => g_addr_width-2,
+      g_addr_width  => g_addr_width,
       g_data_width  => g_data_width
     )
     PORT MAP(
       clock_a         => i_clock,
       clock_b         => i_clock,
-      address_a       => i_avalon_wr.address(g_addr_width-1 DOWNTO 2),
+      address_a       => i_avalon_wr.address(g_addr_width+2-1 DOWNTO 2),
       address_b       => i_addr,
       data_a          => i_avalon_wr.writedata,
       data_b          => i_din,
@@ -52,14 +49,10 @@ BEGIN
   proc_readhandling: PROCESS(i_clock)
   BEGIN
     IF RISING_EDGE(i_clock) THEN
-      r_waitrequest             <= '1';
-      IF i_avalon_select  = '1' AND r_waitrequest = '1' THEN
-        r_waitrequest             <= '0';
-      END IF;
+      o_avalon_rd.waitrequest   <= '0'; --r_waitrequest;
+      o_avalon_rd.readdatavalid <= i_avalon_wr.read AND i_avalon_select ;
     END IF;
   END PROCESS;
 
-  o_avalon_rd.readdatavalid <= i_avalon_wr.read AND i_avalon_select AND NOT r_waitrequest;
-  o_avalon_rd.waitrequest   <= r_waitrequest;
 
 END ARCHITECTURE;
