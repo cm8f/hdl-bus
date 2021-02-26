@@ -79,7 +79,7 @@ BEGIN
       AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
     END IF;
 
-    IF run("multi_wr_multi_rd") THEN 
+    IF run("multi_wr_rd") THEN 
       FOR I IN 0 TO 256 LOOP
         Log(id, "Write/Read from slave "  );
         v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I, v_val'LENGTH));
@@ -87,6 +87,26 @@ BEGIN
         write_bus(net, bus_handle, I*4, v_val);
         WaitForClock(i_clock, 2);
         read_bus(net, bus_handle, I*4, v_tmp);
+        AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
+      END LOOP;
+    END IF; 
+
+    IF run("multi_wr_multi_rd") THEN 
+      FOR I IN 0 TO 255 LOOP
+        Log(id, "Write from slave "  );
+        v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I, v_val'LENGTH));
+        --        net   handle    addr  data
+        write_bus(net, bus_handle, I*4, v_val);
+        WaitForClock(i_clock, 1);
+      END LOOP;
+
+      FOR I IN 0 TO 255 LOOP
+        WaitForClock(i_clock, 2);
+        Log(id, "Read from slave "  );
+        v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I, v_val'LENGTH));
+        --        net   handle    addr  data
+        read_bus(net, bus_handle, I*4, v_tmp);
+        WaitForClock(i_clock, 3);
         AffirmIf(id, v_tmp = v_val, TO_HSTRING(v_val) & " /= " & TO_HSTRING(v_tmp));
       END LOOP;
     END IF; 
