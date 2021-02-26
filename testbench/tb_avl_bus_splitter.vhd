@@ -172,28 +172,28 @@ BEGIN
       END LOOP;
     END IF;
 
-    IF run("burst_wr_burst_rd") THEN
-      FOR C IN 0 TO g_number_ports-1 LOOP
-        Log(id, "Write/Read from slave " & TO_STRING(C));
-        FOR I IN 0 TO 3 LOOP
-          push(c_data_queue, STD_LOGIC_VECTOR(TO_UNSIGNED(C+I+1234, 32)));
-        END LOOP;
-        --        net   handle    addr  data
-        Log(id, "Write from slave " & TO_STRING(C));
-        burst_write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
-        WaitForClock(i_clock, 5);
-        AffirmIf(id, is_empty(c_data_queue) = TRUE, "wr queue not flushed by master");
-        WaitForClock(i_clock, 2);
-        Log(id, "Read from slave " & TO_STRING(C));
-        burst_read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
-        FOR I IN 0 TO 3 LOOP
-          v_tmp := pop(c_data_queue);
-          AffirmIf(id, v_tmp = STD_LOGIC_VECTOR(TO_UNSIGNED(C+i+1234, 32)), "read error");
-        END LOOP;
-        AffirmIf(id, is_empty(c_data_queue) = TRUE, "rd queue not flushed by master");
-      END LOOP;
+    --IF run("burst_wr_burst_rd") THEN
+    --  FOR C IN 0 TO g_number_ports-1 LOOP
+    --    Log(id, "Write/Read from slave " & TO_STRING(C));
+    --    FOR I IN 0 TO 3 LOOP
+    --      push(c_data_queue, STD_LOGIC_VECTOR(TO_UNSIGNED(C+I+1234, 32)));
+    --    END LOOP;
+    --    --        net   handle    addr  data
+    --    Log(id, "Write from slave " & TO_STRING(C));
+    --    burst_write_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
+    --    WaitForClock(i_clock, 5);
+    --    AffirmIf(id, is_empty(c_data_queue) = TRUE, "wr queue not flushed by master");
+    --    WaitForClock(i_clock, 2);
+    --    Log(id, "Read from slave " & TO_STRING(C));
+    --    burst_read_bus(net, bus_handle, TO_INTEGER(UNSIGNED(c_address_map(C))) + 4, 4, c_data_queue);
+    --    FOR I IN 0 TO 3 LOOP
+    --      v_tmp := pop(c_data_queue);
+    --      AffirmIf(id, v_tmp = STD_LOGIC_VECTOR(TO_UNSIGNED(C+i+1234, 32)), "read error");
+    --    END LOOP;
+    --    AffirmIf(id, is_empty(c_data_queue) = TRUE, "rd queue not flushed by master");
+    --  END LOOP;
 
-    END IF;
+    --END IF;
 
     ReportAlerts;
     check(GetAffirmCount > 0,  "not selfchecking");
