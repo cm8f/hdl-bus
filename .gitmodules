@@ -1,0 +1,3 @@
+[submodule "external/hdl-base"]
+	path = external/hdl-base
+	url = git@europa:/home/git/hdl-base.git
