@@ -19,6 +19,7 @@ def create_test_suite(prj, args):
     lib.add_source_files(join(root, "./hdl/*.vhd"))
     lib.add_source_files(join(root, "./testbench/*.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/ram/hdl/*.vhd"))
+    lib.add_source_files(join(root, "./external/hdl-base/fifo/hdl/*.vhd"))
 
     prj.add_osvvm()
     prj.add_random()
