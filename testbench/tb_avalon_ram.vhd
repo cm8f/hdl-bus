@@ -16,6 +16,7 @@ CONTEXT vunit_lib.vc_context;
 ENTITY tb_avl_ram IS
   GENERIC (
     runner_cfg        : string;
+    g_addr_width      : INTEGER RANGE 8 TO 15; 
     -- master config
     g_master_write_high_prob  : REAL := 1.0;
     g_master_read_high_prob   : REAL := 1.0
@@ -80,7 +81,7 @@ BEGIN
     END IF;
 
     IF run("multi_wr_rd") THEN 
-      FOR I IN 0 TO 256 LOOP
+      FOR I IN 0 TO 2**g_addr_width-1 LOOP
         Log(id, "Write/Read from slave "  );
         v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I, v_val'LENGTH));
         --        net   handle    addr  data
@@ -92,7 +93,7 @@ BEGIN
     END IF; 
 
     IF run("multi_wr_multi_rd") THEN 
-      FOR I IN 0 TO 255 LOOP
+      FOR I IN 0 TO 2**g_addr_width-1 LOOP
         Log(id, "Write from slave "  );
         v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I, v_val'LENGTH));
         --        net   handle    addr  data
@@ -100,7 +101,7 @@ BEGIN
         WaitForClock(i_clock, 1);
       END LOOP;
 
-      FOR I IN 0 TO 255 LOOP
+      FOR I IN 0 TO 2**g_addr_width -1 LOOP
         WaitForClock(i_clock, 2);
         Log(id, "Read from slave "  );
         v_val := STD_LOGIC_VECTOR(TO_UNSIGNED(I, v_val'LENGTH));
@@ -149,7 +150,7 @@ BEGIN
   --====================================================================
   inst_dut : ENTITY WORK.avl_ram
     GENERIC MAP(
-      g_addr_width      => 8,
+      g_addr_width      => g_addr_width,
       g_data_width      => 32
     )
     PORT MAP(
