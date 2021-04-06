@@ -16,6 +16,7 @@ def create_test_suite(prj, args):
         lib = prj.library("work_lib")
     except:
         lib = prj.add_library("work_lib")
+    lib.add_source_files(join(root, "./hdl/**/*.vhd"))
     lib.add_source_files(join(root, "./hdl/*.vhd"))
     lib.add_source_files(join(root, "./testbench/*.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/ram/hdl/*.vhd"))
@@ -34,7 +35,7 @@ def create_test_suite(prj, args):
             lib.set_compile_option("enable_coverage", True)
 
     tb_reg_bank = lib.test_bench("tb_avl_gen_reg_bank")
-    registers = [4, 8, 16, 32, 64, 128, 256]
+    registers = [4, 64, 256]
     widths = [32]
 
     for test in tb_reg_bank.get_tests():
@@ -49,13 +50,24 @@ def create_test_suite(prj, args):
                 )
 
     tb_splitter = lib.test_bench("tb_avl_bus_splitter")
-    num_ports = range(2, 15)
+    num_ports = [2, 3, 16]
     for test in tb_splitter.get_tests():
         for num in num_ports:
             test.add_config(
                 name="slaves=%d" % num,
                 generics=dict(
                     g_number_ports = num
+                )
+            )
+    
+    tb_ram = lib.test_bench("tb_avl_ram")
+    addr_width = [8, 10, 15]
+    for test in tb_ram.get_tests():
+        for wdt in addr_width:
+            test.add_config(
+                name="addr_width=%d" % wdt,
+                generics=dict(
+                    g_addr_width = wdt 
                 )
             )
 
