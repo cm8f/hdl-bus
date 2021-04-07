@@ -1,4 +1,4 @@
-## Avalon Bus Splitter
+[##](##) Avalon Bus Splitter
 
 
 ### Generics 
@@ -41,7 +41,7 @@ begin
 ...
   inst_dut : ENTITY WORK.avl_bus_splitter
     GENERIC MAP (
-      g_number_ports          => 2,
+      g_number_ports          => 4,
       g_compare_bit_upper     => 17,
       g_compare_bit_lower     => 16,
       g_address_map           => c_address_map(0 TO g_number_ports-1)
