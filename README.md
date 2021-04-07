@@ -4,9 +4,12 @@
 
 This is a VHDL repository containing some avalon bus components (vendor independent) 
 
- * [Avalon System Identification](./doc/avl_version.md)
- * [Avalon Interrupt controller](./doc/avl_irq.md)
+ * [Avalon Types](./doc/avl_package.md)
  * [Avalon Bus Splitter](./doc/avl_bus_splitter.md) 
+ * [Avalon Interrupt controller](./doc/avl_irq.md)
+ * [Avalon RAM](./doc/avl_ram.md)
+ * [Avalon System Identification](./doc/avl_version.md)
+ * [Avalon UART](./doc/avl_uart.md)
 
 ### How do I get set up?/How to run tests ###
 
