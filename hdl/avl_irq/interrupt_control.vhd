@@ -105,7 +105,7 @@ BEGIN
   proc_reg: PROCESS(i_clock) 
   BEGIN
     IF RISING_EDGE(i_clock) THEN
-	  r_asel_int <= s_asel_int; 
+	  r_asel_int <= s_asel_int AND i_avalon_wr.read; 
 	  r_waitrequest <= '0';
       IF i_avalon_wr.read OR i_avalon_wr.write THEN
 		r_waitrequest       <= s_waitrequest;
@@ -129,24 +129,23 @@ BEGIN
     IF RISING_EDGE(i_clock) THEN
       IF r_asel_int THEN
         r_reg_int <= (OTHERS => '0');
-      ELSE 
-        FOR I IN 0 TO r_reg_int'LENGTH-1 LOOP
-          IF r_cfg_type(i) = p_type_level THEN
-            IF (r_input(I) XNOR r_cfg_level_edge(I)) AND r_cfg_mask(I) THEN
-              r_reg_int(I) <= '1';
-            END IF;
-          END IF;
-
-          IF r_cfg_type(I) = p_type_edge THEN
-            IF r_cfg_mask(I) = '1' 
-              AND ( (r_cfg_level_edge(I) = '0' AND r_input(I) = '0' AND i_input(I) = '1' )
-              OR    (r_cfg_level_edge(I) = '1' AND r_input(I) = '1' AND i_input(I) = '0' ) ) THEN 
-              r_reg_int(I) <= '1';
-            END IF;
-              
-          END IF;
-        END LOOP;
       END IF;
+      FOR I IN 0 TO r_reg_int'LENGTH-1 LOOP
+        IF r_cfg_type(i) = p_type_level THEN
+          IF (r_input(I) XNOR r_cfg_level_edge(I)) AND r_cfg_mask(I) THEN
+            r_reg_int(I) <= '1';
+          END IF;
+        END IF;
+
+        IF r_cfg_type(I) = p_type_edge THEN
+          IF r_cfg_mask(I) = '1' 
+            AND ( (r_cfg_level_edge(I) = '0' AND r_input(I) = '0' AND i_input(I) = '1' )
+            OR    (r_cfg_level_edge(I) = '1' AND r_input(I) = '1' AND i_input(I) = '0' ) ) THEN 
+            r_reg_int(I) <= '1';
+          END IF;
+            
+        END IF;
+      END LOOP;
     END IF;
   END PROCESS;
 
