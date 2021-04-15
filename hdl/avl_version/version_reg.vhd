@@ -8,7 +8,11 @@ USE WORK.version_pkg.ALL;
 
 ENTITY version_reg_bus_interface IS
   GENERIC(
-    g_features            : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0')
+    g_features            : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+    g_system_version      : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+    g_git_revision        : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+    g_timestamp           : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+    g_buildnumber         : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0')
   );
   PORT (
     -- system
@@ -32,16 +36,8 @@ ARCHITECTURE rtl OF version_reg_bus_interface IS
   SIGNAL   r_readdatavalid                  : STD_LOGIC := '0';
   SIGNAL   s_readdatavalid                  : STD_LOGIC := '0';
 
-  SIGNAL   s_gitversion                     : STD_LOGIC_VECTOR(31 DOWNTO 0);
-  SIGNAL   s_timestamp                      : STD_LOGIC_VECTOR(31 DOWNTO 0);
-  SIGNAL   s_buildnumber                    : STD_LOGIC_VECTOR(31 DOWNTO 0);
-  SIGNAL   s_features                       : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
-
 BEGIN
 
-  s_buildnumber <= p_version_reg_buildnumber;
-  s_timestamp   <= p_version_reg_timestamp;
-  s_gitversion  <= p_version_reg_gitversion;
 
   proc_addr_decoder : PROCESS(ALL) 
   BEGIN
@@ -52,27 +48,27 @@ BEGIN
 
     IF i_avalon_select  = '1' AND r_waitrequest = '0' THEN
       IF i_avalon_wr.address(t_version_decoder'RANGE) = p_addr_version_reg_system_version(t_version_decoder'RANGE) THEN
-        s_readdata                        <= p_version_reg_system_version;
+        s_readdata                        <= g_system_version;
         s_readdatavalid                   <= i_avalon_wr.read;
       END IF; 
 
       IF i_avalon_wr.address(t_version_decoder'RANGE) = p_addr_version_reg_gitversion(t_version_decoder'RANGE) THEN
-        s_readdata                        <= s_gitversion;
+        s_readdata                        <= g_git_revision;
         s_readdatavalid                   <= i_avalon_wr.read;
       END IF; 
 
       IF i_avalon_wr.address(t_version_decoder'RANGE) = p_addr_version_reg_timestamp(t_version_decoder'RANGE) THEN
-        s_readdata                        <= s_timestamp;
+        s_readdata                        <= g_timestamp;
         s_readdatavalid                   <= i_avalon_wr.read;
       END IF; 
 
       IF i_avalon_wr.address(t_version_decoder'RANGE) = p_addr_version_reg_buildnumber(t_version_decoder'RANGE) THEN
-        s_readdata                        <= s_buildnumber;
+        s_readdata                        <= g_buildnumber;
         s_readdatavalid                   <= i_avalon_wr.read;
       END IF; 
 
       IF i_avalon_wr.address(t_version_decoder'RANGE) = p_addr_version_reg_features(t_version_decoder'RANGE) THEN
-        s_readdata                        <= s_features;
+        s_readdata                        <= g_features;
         s_readdatavalid                   <= i_avalon_wr.read;
       END IF; 
     END IF;
@@ -93,11 +89,9 @@ BEGIN
     END IF;
   END PROCESS;
 
-  o_avalon_rd.readdata            <= s_readdata;
-  o_avalon_rd.readdatavalid       <= s_readdatavalid;
-  o_avalon_rd.waitrequest         <= s_waitrequest;
-
-  s_features <= g_features;
+  o_avalon_rd.readdata            <= r_readdata;
+  o_avalon_rd.readdatavalid       <= r_readdatavalid;
+  o_avalon_rd.waitrequest         <= '0';
 
 END ARCHITECTURE rtl;
 
