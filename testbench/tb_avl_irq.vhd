@@ -57,7 +57,7 @@ BEGIN
     test_runner_setup(runner, runner_cfg);
     id <= GetAlertLogID(PathTail(tb_avl_irq'INSTANCE_NAME));
     WAIT FOR 0 ns;
-    SetLogEnable(PASSED, TRUE);
+    SetLogEnable(PASSED, FALSE);
 
     WaitForLevel(i_reset, '1');
     WaitForLevel(i_reset, '0');
@@ -65,12 +65,30 @@ BEGIN
 
     WHILE test_suite LOOP 
       IF run("test") THEN 
+        -- irq[1:0] are edge interrupts
+        -- irq[3:2] is level interrupt
         v_addr := p_addr_interrupt_reg_config0;
         v_data := x"00000003";
         write_bus(net, bus_handle, v_addr, v_data);
         WaitForClock(i_clock, 5);
 
+        -- irq[0] is 'falling edge'
+        -- irq[1] is 'rising edge'
+        -- irq[2] is 'active high'
+        -- irq[3] is 'active low'
         v_addr := p_addr_interrupt_reg_config1;
+        v_data := x"00000005";
+        write_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+
+        Log(id, "Clear Interrupt register");
+        v_addr := p_addr_interrupt_reg_int;
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+
+        -- write mask
+        Log(id, "enable Interrupt0");
+        v_addr := p_addr_interrupt_reg_mask;
         v_data := x"00000007";
         write_bus(net, bus_handle, v_addr, v_data);
         WaitForClock(i_clock, 5);
@@ -78,18 +96,50 @@ BEGIN
         v_addr := p_addr_interrupt_reg_int;
         read_bus(net, bus_handle, v_addr, v_data);
         WaitForClock(i_clock, 5);
-
-        -- write mask
-        v_addr := p_addr_interrupt_reg_mask;
-        v_data := x"00000001";
-        write_bus(net, bus_handle, v_addr, v_data);
-        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000000", "IRQ asserted after enable", ERROR);
 
         s_input(0) <= '1';
-        WAIT UNTIL RISING_EDGE(i_clock);
+        WaitForClock(i_clock, 5);
+        -- expected no change
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000000", "@RISING EDGE: falling edge irq triggered", ERROR);
+
         s_input(0) <= '0';
-        WAIT UNTIL RISING_EDGE(i_clock);
-	
+        WaitForClock(i_clock, 5);
+        read_bus(net, bus_handle, v_addr, v_data);
+        AffirmIf(id, v_data = x"00000001", "@FALLING EDGE: falling edge missed", ERROR);
+
+        --WaitForClock(i_clock, 5);
+        s_input(1) <= '1';
+        WaitForClock(i_clock, 5);
+        -- expected no change
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000002", "@RISING EDGE: rising edge missed ", ERROR);
+        s_input(1) <= '0';
+
+        s_input(2) <= '1';
+        WaitForClock(i_clock, 5);
+        -- expected no change
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000004", "@ACTIVE LEVEL:  level irq missed ", ERROR);
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000004", "@ACTIVE LEVEL:  level irq missed ", ERROR);
+        s_input(2) <= '0';
+
+        --clear last irq 
+        WaitForClock(i_clock, 5);
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000004", "@ACTIVE LEVEL:  level irq missed ", ERROR);
+
+        read_bus(net, bus_handle, v_addr, v_data);
+        WaitForClock(i_clock, 5);
+        AffirmIf(id, v_data = x"00000000", "@INACTIVE LEVEL:  level irq still asserted ", ERROR);
+
         WAIT FOR 100 ns;	
         v_addr := p_addr_interrupt_reg_int;
         read_bus(net, bus_handle, v_addr, v_data);
