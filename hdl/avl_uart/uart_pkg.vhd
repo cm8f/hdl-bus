@@ -1,0 +1,14 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.NUMERIC_STD.ALL;
+
+PACKAGE uart_pkg IS 
+
+  SUBTYPE t_uart_decoder      IS STD_LOGIC_VECTOR(7 DOWNTO 2);
+  CONSTANT p_addr_uart_divider : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"00000000";
+  CONSTANT p_addr_uart_tx_data : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"00000004";
+  CONSTANT p_addr_uart_tx_stat : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"00000008";
+  CONSTANT p_addr_uart_rx_data : STD_LOGIC_vECTOR(31 DOWNTO 0) := x"0000000C";
+  CONSTANT p_addr_uart_rx_stat : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"00000010";
+
+END PACKAGE uart_pkg;
