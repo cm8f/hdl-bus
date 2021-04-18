@@ -150,6 +150,7 @@ BEGIN
     ReportAlerts;
     check(GetAffirmCount > 0, "not selfchecking");
     check_equal(GetAlertCount, 0, "errors occured");
+    test_runner_cleanup(runner);
 
   END PROCESS;
 
