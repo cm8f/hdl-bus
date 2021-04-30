@@ -15,7 +15,8 @@ USE WORK.uart_pkg.ALL;
 
 ENTITY tb_avl_uart IS
   GENERIC (
-    runner_cfg : STRING
+    runner_cfg  : STRING;
+    g_baud      : INTEGER := 115200
   );
 END ENTITY;
 
@@ -30,7 +31,7 @@ ARCHITECTURE tb OF tb_avl_uart IS
   SIGNAL i_uart_rx          : STD_LOGIC;
 
   CONSTANT c_period         : TIME      := 20 ns;
-  CONSTANT c_uart_divider : INTEGER := 50000000/250000;
+  CONSTANT c_uart_divider : INTEGER := 50000000/g_baud;
   CONSTANT p_addr_base_uart   : STD_LOGIC_VECTOR(31 DOWNTO 0) := x"00000000";
   SUBTYPE t_address_decoder   IS STD_LOGIC_VECTOR(15 DOWNTO 14);
 
@@ -91,7 +92,7 @@ BEGIN
         write_bus(net, bus_handle, v_addr, v_data);
 
         
-        WAIT FOR 6 ms;
+        WAIT FOR 240 ms;
 
         -- READ 
         v_addr(7 DOWNTO 0) := x"0C";

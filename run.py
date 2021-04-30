@@ -77,6 +77,16 @@ def create_test_suite(prj, args):
                     g_addr_width = wdt 
                 )
             )
+    tb_uart = lib.test_bench("tb_avl_uart")
+    baud_arr = [4800, 9600, 14400, 19200, 57600, 115200, 128000, 256000]
+    for test in tb_uart.get_tests():
+        for baud in baud_arr:
+            test.add_config(
+                    name="baud=%d" % baud,
+                    generics=dict(
+                        g_baud=baud
+                    )
+                )
 
 
 if __name__ == "__main__":
