@@ -17,7 +17,7 @@ ENTITY tb_avl_gen_reg_bank IS
   GENERIC (
     runner_cfg        : string;
     g_registers       : INTEGER RANGE 4 TO 256 := 4;
-    g_register_width  : INTEGER RANGE 8 TO 32  := 32
+    g_register_width  : INTEGER RANGE 32 TO 32  := 32
   );
 END ENTITY;
 
@@ -36,8 +36,8 @@ ARCHITECTURE tb OF tb_avl_gen_reg_bank IS
   SIGNAL o_avalon_rd      : t_avalonf_slave_out;
 
   SIGNAL i_reg_wrreq      : STD_LOGIC_VECTOR(c_registers-1 DOWNTO 0);
-  SIGNAL i_reg_din        : t_slv_matrix(c_registers-1 DOWNTO 0)(c_register_width-1 DOWNTO 0);
-  SIGNAL o_reg_dout       : t_slv_matrix(c_registers-1 DOWNTO 0)(c_register_width-1 DOWNTO 0);
+  SIGNAL i_reg_din        : t_slv32_matrix(c_registers-1 DOWNTO 0);
+  SIGNAL o_reg_dout       : t_slv32_matrix(c_registers-1 DOWNTO 0);
   SIGNAL o_reg_valid      : STD_LOGIC_VECTOR(c_registers-1 DOWNTO 0);
 
 

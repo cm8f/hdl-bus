@@ -31,7 +31,7 @@ ARCHITECTURE tb OF tb_avl_bus_splitter IS
   CONSTANT c_period               : TIME    := 10 ns;
   CONSTANT c_comp_upper_bit   : INTEGER := 31;
   CONSTANT c_comp_lower_bit   : INTEGER := 16;
-  CONSTANT c_address_map      : t_slv_matrix(0 TO 15)(31 DOWNTO 0) := (
+  CONSTANT c_address_map      : t_slv32_matrix(0 TO 15) := (
                                                         0  => x"00000000",
                                                         1  => x"00010000",
                                                         2  => x"00020000",

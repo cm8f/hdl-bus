@@ -4,7 +4,7 @@ USE IEEE.NUMERIC_STD.ALL;
 
 PACKAGE avalon_pkg IS
 
-  TYPE t_slv_matrix IS ARRAY(NATURAL RANGE <>) OF STD_LOGIC_VECTOR;
+  TYPE t_slv32_matrix IS ARRAY(NATURAL RANGE <>) OF STD_LOGIC_VECTOR(31 DOWNTO 0);
 
   CONSTANT p_avl_st_data_width    : INTEGER := 32;
   CONSTANT p_avl_mm_addr_width    : INTEGER := 32;

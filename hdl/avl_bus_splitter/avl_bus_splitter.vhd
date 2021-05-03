@@ -9,7 +9,7 @@ ENTITY avl_bus_splitter IS
     g_number_ports          : INTEGER RANGE 2 TO 16 := 4;
     g_compare_bit_upper     : INTEGER := 15;
     g_compare_bit_lower     : INTEGER := 14;
-    g_address_map           : t_slv_matrix(0 TO g_number_ports-1)(31 DOWNTO 0)
+    g_address_map           : t_slv32_matrix
   );
   PORT(
     i_clock                 : IN STD_LOGIC;

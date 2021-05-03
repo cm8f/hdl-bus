@@ -19,9 +19,9 @@ ENTITY avl_gen_reg_bank IS
     i_avalon_wr       : IN  t_avalonf_slave_in;
     o_avalon_rd       : OUT t_avalonf_slave_out;
     --
-    i_reg_wrreq       : IN  STD_LOGIC_VECTOR(g_registers-1 DOWNTO 0);
-    i_reg_din         : IN  t_slv_matrix(g_registers-1 DOWNTO 0)(g_reg_width-1 DOWNTO 0);
-    o_reg_dout        : OUT t_slv_matrix(g_registers-1 DOWNTO 0)(g_reg_width-1 DOWNTO 0);
+    i_reg_wrreq       : IN  STD_LOGIC_VECTOR(g_registers-1 DOWNTO 0)    := (OTHERS => '0');
+    i_reg_din         : IN  t_slv32_matrix(g_registers-1 DOWNTO 0)      := (OTHERS => (OTHERS => '0'));
+    o_reg_dout        : OUT t_slv32_matrix(g_registers-1 DOWNTO 0);
     o_reg_valid       : OUT STD_LOGIC_VECTOR(g_registers-1 DOWNTO 0)
   );
 END ENTITY;
@@ -37,7 +37,7 @@ ARCHITECTURE rtl OF avl_gen_reg_bank IS
 
   SIGNAL s_aselect        : STD_LOGIC_VECTOR(g_registers-1 DOWNTO 0);
   SIGNAL s_reg_addr       : INTEGER;
-  SIGNAL r_registers      : t_slv_matrix(g_registers-1 DOWNTO 0)(g_reg_width-1 DOWNTO 0) := (OTHERS => (OTHERS => '0'));
+  SIGNAL r_registers      : t_slv32_matrix(g_registers-1 DOWNTO 0) := (OTHERS => (OTHERS => '0'));
 
 BEGIN
 
