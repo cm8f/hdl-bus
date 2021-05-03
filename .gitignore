@@ -1,5 +1,10 @@
-**/db/*
-**/output_files/*
 **/*.sopcinfo
 **.bak
 **/.qsys_edit
+**/workspace/simulation/
+**/workspace/incremental_db/
+**/workspace/nios_test_system/
+**/workspace/db/
+**/workspace/output_files/
+**/workspace/cr_ie_info.json
+**/workspace/c5_pin_model_dump.txt
