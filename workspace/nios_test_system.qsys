@@ -6,7 +6,7 @@
    version="1.0"
    description=""
    tags=""
-   categories="" />
+   categories="System" />
  <parameter name="bonusData"><![CDATA[bonusData 
 {
    element clk_0
@@ -14,6 +14,14 @@
       datum _sortIndex
       {
          value = "0";
+         type = "int";
+      }
+   }
+   element irq_bridge_0
+   {
+      datum _sortIndex
+      {
+         value = "7";
          type = "int";
       }
    }
@@ -127,7 +135,7 @@
  <parameter name="hideFromIPCatalog" value="false" />
  <parameter name="lockedInterfaceDefinition" value="" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="" />
+ <parameter name="projectName" value="avl-integration.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="0" />
  <parameter name="testBenchDutName" value="" />
@@ -135,6 +143,11 @@
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
+ <interface
+   name="irq_bridge_0_receiver_irq"
+   internal="irq_bridge_0.receiver_irq"
+   type="interrupt"
+   dir="start" />
  <interface
    name="mm_bridge_0_m0"
    internal="mm_bridge_0.m0"
@@ -146,6 +159,15 @@
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module
+   name="irq_bridge_0"
+   kind="altera_irq_bridge"
+   version="20.1"
+   enabled="1">
+  <parameter name="AUTO_RECEIVER_IRQ_INTERRUPTS_USED" value="0" />
+  <parameter name="IRQ_N" value="0" />
+  <parameter name="IRQ_WIDTH" value="1" />
  </module>
  <module
    name="jtag_uart_0"
@@ -254,7 +276,7 @@
   <parameter name="instruction_master_high_performance_paddr_size" value="0" />
   <parameter name="instruction_master_paddr_base" value="0" />
   <parameter name="instruction_master_paddr_size" value="0" />
-  <parameter name="internalIrqMaskSystemInfo" value="3" />
+  <parameter name="internalIrqMaskSystemInfo" value="7" />
   <parameter name="io_regionbase" value="0" />
   <parameter name="io_regionsize" value="0" />
   <parameter name="master_addr_map" value="false" />
@@ -494,6 +516,7 @@
  <connection kind="clock" version="20.1" start="clk_0.clk" end="timer_0.clk" />
  <connection kind="clock" version="20.1" start="clk_0.clk" end="mm_bridge_0.clk" />
  <connection kind="clock" version="20.1" start="clk_0.clk" end="jtag_uart_0.clk" />
+ <connection kind="clock" version="20.1" start="clk_0.clk" end="irq_bridge_0.clk" />
  <connection
    kind="clock"
    version="20.1"
@@ -513,6 +536,18 @@
    end="jtag_uart_0.irq">
   <parameter name="irqNumber" value="1" />
  </connection>
+ <connection
+   kind="interrupt"
+   version="20.1"
+   start="nios2_gen2_0.irq"
+   end="irq_bridge_0.sender0_irq">
+  <parameter name="irqNumber" value="2" />
+ </connection>
+ <connection
+   kind="reset"
+   version="20.1"
+   start="clk_0.clk_reset"
+   end="irq_bridge_0.clk_reset" />
  <connection
    kind="reset"
    version="20.1"
