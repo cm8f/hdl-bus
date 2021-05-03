@@ -1,17 +1,11 @@
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "avalon_pkg.vhd"]
-
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_bus_splitter/avl_bus_splitter.vhd"]
-
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_gen_register/avl_gen_reg_bank.vhd"]
-
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_irq/interrupt_control.vhd"]
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_irq/interrupt_pkg.vhd"]
-
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_ram/avl_ram.vhd"]
-
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_uart/uart_pkg.vhd"]
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_uart/uart_bus_if.vhd"]
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_uart/avl_uart.vhd"]
-
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_version/version_pkg.vhd"]
-set_global_assignment -library "work" -name VHDL_FILE [file join $::quartus(qip_path) "./avl_version/version_reg.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "avalon_pkg.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_bus_splitter/avl_bus_splitter.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_gen_register/avl_gen_reg_bank.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_irq/interrupt_control.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_irq/interrupt_pkg.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_ram/avl_ram.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_uart/uart_pkg.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_uart/uart_bus_if.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_uart/avl_uart.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_version/version_pkg.vhd"]
+set_global_assignment -library "work" -hdl_version VHDL_2008 -name VHDL_FILE [file join $::quartus(qip_path) "./avl_version/version_reg.vhd"]
