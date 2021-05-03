@@ -25,7 +25,7 @@
 ### Usage
 
 ```
-  CONSTANT c_address_map      : t_slv_matrix(0 TO 3)(31 DOWNTO 0) := (
+  CONSTANT c_address_map      : t_slv32_matrix(0 TO 3) := (
                                                         0  => x"00000000",
                                                         1  => x"00010000",
                                                         2  => x"00020000",
