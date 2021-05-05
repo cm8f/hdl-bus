@@ -81,11 +81,10 @@ BEGIN
 
 
 
-  inst_tx_fifo : ENTITY WORK.fifo_sc_mixed
+  inst_tx_fifo : ENTITY WORK.fifo_sc_single
     GENERIC MAP(
-      g_wr_width    => 8,
-      g_rd_width    => 8,
-      g_wr_depth    => 512
+      g_width       => 8,
+      g_depth       => 512
     )
     PORT MAP(
       i_clock       => i_clock,
@@ -158,11 +157,10 @@ BEGIN
 
 
 
-  inst_rx_fifo : ENTITY WORK.fifo_sc_mixed
+  inst_rx_fifo : ENTITY WORK.fifo_sc_single
     GENERIC MAP(
-      g_wr_width    => 8,
-      g_rd_width    => 8,
-      g_wr_depth    => 512
+      g_width       => 8,
+      g_depth       => 512
     )
     PORT MAP(
       i_clock       => i_clock,
