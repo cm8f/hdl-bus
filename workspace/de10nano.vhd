@@ -123,7 +123,7 @@ BEGIN
   --====================================================================
   inst_reg_bank: ENTITY WORK.avl_gen_reg_bank 
     GENERIC MAP(
-      g_registers     => 64, 
+      g_registers     => 16, 
       g_reg_width     => 32,
       g_addr_upper_bit  => 7,
       g_addr_lower_bit  => 2
@@ -160,19 +160,19 @@ BEGIN
   --====================================================================
   --= ram 
   --====================================================================
-  --inst_ram : ENTITY WORK.avl_ram 
-  --  GENERIC MAP(
-  --    g_addr_width          => 8,
-  --    g_data_width          => 32
-  --  )
-  --  PORT MAP(
-  --    i_clock               => s_clock,
-  --    i_reset               => s_reset, 
-  --    --
-  --    i_avalon_select       => s_avalon_splitter_select (c_index_ram),
-  --    i_avalon_wr           => s_avalon_splitter_wr     (c_index_ram),
-  --    o_avalon_rd           => s_avalon_splitter_rd     (c_index_ram)
-  --  );
+  inst_ram : ENTITY WORK.avl_ram 
+    GENERIC MAP(
+      g_addr_width          => 8,
+      g_data_width          => 32
+    )
+    PORT MAP(
+      i_clock               => s_clock,
+      i_reset               => s_reset, 
+      --
+      i_avalon_select       => s_avalon_splitter_select (c_index_ram),
+      i_avalon_wr           => s_avalon_splitter_wr     (c_index_ram),
+      o_avalon_rd           => s_avalon_splitter_rd     (c_index_ram)
+    );
 
 
 
