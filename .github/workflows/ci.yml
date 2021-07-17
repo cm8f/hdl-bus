@@ -12,4 +12,4 @@ jobs:
       
       - uses: docker://ghdl/vunit:gcc
         with:
-          args: python3 ./run.py -p 12
+          args: python3 ./run.py -p 12 -m
