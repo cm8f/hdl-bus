@@ -13,8 +13,8 @@ ENTITY avl_interrupt_control IS
     i_reset           : IN  STD_LOGIC;
     --
     i_avalon_select   : IN  STD_LOGIC;
-    i_avalon_wr       : IN  t_avalonf_slave_in;
-    o_avalon_rd       : OUT t_avalonf_slave_out;
+    i_avalon_wr       : IN  t_avalon_slave_in;
+    o_avalon_rd       : OUT t_avalon_slave_out;
     --
     i_input           : IN  STD_LOGIC_VECTOR(31 DOWNTO 0);
     o_interrupt       : OUT STD_LOGIC
@@ -35,8 +35,6 @@ ARCHITECTURE rtl OF avl_interrupt_control IS
   SIGNAL r_readdata         : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
   SIGNAL s_waitrequest      : STD_LOGIC := '0';
   SIGNAL r_waitrequest      : STD_LOGIC := '0';
-  SIGNAL r_readdatavalid    : STD_LOGIC := '0';
-  SIGNAL s_readdatavalid    : STD_LOGIC := '0';
 
   SIGNAL s_asel_mask        : STD_LOGIC;
   SIGNAL s_asel_config0     : STD_LOGIC;
@@ -61,7 +59,6 @@ BEGIN
   BEGIN
 
     s_waitrequest                   <= '0';
-    s_readdatavalid                 <= '0';
     s_readdata                      <= x"DEADBEEF";
 
     s_asel_mask       <= '0';
@@ -76,25 +73,21 @@ BEGIN
       IF i_avalon_wr.address(t_interrupt_decoder'RANGE) = p_addr_interrupt_reg_mask(t_interrupt_decoder'RANGE) THEN
         s_asel_mask                       <= '1';
         s_readdata                        <= r_cfg_mask;
-        s_readdatavalid                   <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_interrupt_decoder'RANGE) = p_addr_interrupt_reg_config0(t_interrupt_decoder'RANGE) THEN
         s_asel_config0                    <= '1';
         s_readdata                        <= r_cfg_type;
-        s_readdatavalid                   <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_interrupt_decoder'RANGE) = p_addr_interrupt_reg_config1(t_interrupt_decoder'RANGE) THEN
         s_asel_config1                    <= '1';
         s_readdata                        <= r_cfg_level_edge;
-        s_readdatavalid                   <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_interrupt_decoder'RANGE) = p_addr_interrupt_reg_int(t_interrupt_decoder'RANGE) THEN
         s_asel_int                        <= '1';
         s_readdata                        <= r_reg_int;
-        s_readdatavalid                   <= i_avalon_wr.read;
       END IF;
 
     END IF;
@@ -110,15 +103,11 @@ BEGIN
       IF i_avalon_wr.read OR i_avalon_wr.write THEN
 		r_waitrequest       <= s_waitrequest;
 	  END IF; 
-      IF i_avalon_wr.read = '1' THEN
-        r_readdatavalid     <= s_readdatavalid;
-      END IF;
       r_readdata          <= s_readdata;
     END IF;
   END PROCESS;
 
   o_avalon_rd.readdata      <= s_readdata;
-  o_avalon_rd.readdatavalid <= s_readdatavalid;
   o_avalon_rd.waitrequest   <= s_waitrequest;
 
 
