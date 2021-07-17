@@ -47,6 +47,7 @@ def create_test_suite(prj, args):
     lib.add_source_files(join(root, "./external/hdl-base/ram/hdl/ram_tdp.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/ram/hdl/ram_sdp.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/fifo/hdl/fifo_sc_single.vhd"))
+    lib.add_source_files(join(root, "./external/hdl-base/fifo/hdl/fifo_sc_mixed.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/uart/hdl/uart_tx.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/uart/hdl/uart_rx.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/uart/hdl/uart_wrapper_top.vhd"))
@@ -89,19 +90,16 @@ def create_test_suite(prj, args):
                     g_number_ports = num
                 )
             )
-    tb_arbiter = lib.test_bench("tb_avl_bus_splitter")
-    num_ports = [1, 2, 3]
-    strategies = ["PRIO", "RR"]
+    tb_arbiter = lib.test_bench("tb_avl_bus_arbiter")
+    num_ports = [1, 2, 3, 4]
     for test in tb_arbiter.get_tests():
-        for strat in strategies:
-            for num in num_ports:
-                test.add_config(
-                    name="%s,masters=%d" % (strat, num), 
-                    generics=dict(
-                        g_number_ports=num,
-                        g_strategy=strat
-                        )
-                    )
+        for num in num_ports:
+            test.add_config(
+                name="masters=%d" %  num, 
+                generics=dict(
+                    g_number_ports=num
+                )
+            )
     
     tb_ram = lib.test_bench("tb_avl_ram")
     addr_width = [8, 10, 12]

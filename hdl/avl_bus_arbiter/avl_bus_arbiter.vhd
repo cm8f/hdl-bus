@@ -13,12 +13,12 @@ ENTITY avalon_bus_arbiter IS
     i_clock             : IN  STD_LOGIC;
     i_reset             : IN  STD_LOGIC;
     -- 
-    i_s_avalon_wr       : IN  t_avalonf_slave_in_matrix(g_number_masters-1 DOWNTO 0);
-    o_s_avalon_rd       : OUT t_avalonf_slave_out_matrix(g_number_masters-1 DOWNTO 0);
+    i_s_avalon_wr       : IN  t_avalon_slave_in_matrix(g_number_masters-1 DOWNTO 0);
+    o_s_avalon_rd       : OUT t_avalon_slave_out_matrix(g_number_masters-1 DOWNTO 0);
     -- 
     o_m_avalon_select   : OUT STD_LOGIC;
-    o_m_avalon_wr       : OUT t_avalonf_master_out;
-    i_m_avalon_rd       : IN  t_avalonf_master_in
+    o_m_avalon_wr       : OUT t_avalon_master_out;
+    i_m_avalon_rd       : IN  t_avalon_master_in
   );
 BEGIN 
 END ENTITY;
@@ -65,11 +65,12 @@ BEGIN
   proc_assign: PROCESS(ALL)
   BEGIN
     o_m_avalon_select <= '0';
-    o_m_avalon_wr     <= c_avalonf_slave_in_init;
-    o_s_avalon_rd     <= (OTHERS => c_avalonf_slave_out_init);
+    o_m_avalon_wr     <= c_avalon_slave_in_init;
+    o_s_avalon_rd     <= (OTHERS => c_avalon_slave_out_init);
 
     FOR I IN 0 TO g_number_masters-1 LOOP 
       o_m_avalon_select <= OR_REDUCE(s_request); 
+      o_s_avalon_rd(I).waitrequest <= (i_s_avalon_wr(I).write OR i_s_avalon_wr(I).read) AND NOT s_grant(I);
       IF s_grant(I) THEN 
         o_m_avalon_wr <= i_s_avalon_wr(I);
         o_s_avalon_rd(I) <= i_m_avalon_rd; 
