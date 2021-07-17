@@ -13,8 +13,8 @@ ENTITY avl_ram IS
     i_clock         : IN  STD_LOGIC;
     i_reset         : IN  STD_LOGIC;
     i_avalon_select : IN  STD_LOGIC;
-    i_avalon_wr     : IN  t_avalonf_slave_in;
-    o_avalon_rd     : OUT t_avalonf_slave_out;
+    i_avalon_wr     : IN  t_avalon_slave_in;
+    o_avalon_rd     : OUT t_avalon_slave_out;
     --
     i_wrreq         : IN  STD_LOGIC := '0';
     i_rdreq         : IN  STD_LOGIC := '0';
@@ -25,6 +25,9 @@ ENTITY avl_ram IS
 END ENTITY avl_ram;
 
 ARCHITECTURE rtl OF avl_ram IS
+
+  SIGNAL s_waitrequest : STD_LOGIC;
+  SIGNAL r_waitrequest : STD_LOGIC;
 
 BEGIN
 
@@ -46,11 +49,15 @@ BEGIN
       q_b             => o_dout
     );
 
+  s_waitrequest <= i_avalon_select AND i_avalon_wr.read AND NOT r_waitrequest;
+  o_avalon_rd.waitrequest <= s_waitrequest;
+
   proc_readhandling: PROCESS(i_clock)
   BEGIN
-    IF RISING_EDGE(i_clock) THEN
-      o_avalon_rd.waitrequest   <= '0'; --r_waitrequest;
-      o_avalon_rd.readdatavalid <= i_avalon_wr.read AND i_avalon_select ;
+    IF i_reset THEN 
+      r_waitrequest <= '0';
+    ELSIF RISING_EDGE(i_clock) THEN
+      r_waitrequest <= s_waitrequest;
     END IF;
   END PROCESS;
 
