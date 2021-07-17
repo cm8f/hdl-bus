@@ -37,6 +37,16 @@ ARCHITECTURE tb OF tb_avl_bus_arbiter IS
   SIGNAL s_m_avalon_rd    : t_avalonf_master_in;
 
   SIGNAL id : AlertLogIDType;
+
+  constant memory : memory_t := new_memory;
+  constant buf : buffer_t := allocate(memory, 128*1024);
+  constant c_avalon_slave : avalon_slave_t :=
+      new_avalon_slave(memory => memory,
+        name => "avmm_vc",
+        readdatavalid_high_probability => 1.0,
+        waitrequest_high_probability => 1.0
+      );
+  
 BEGIN 
   --====================================================================
   --= clocking
@@ -89,7 +99,7 @@ BEGIN
       i_reset           => i_reset,
       --
       i_s_avalon_wr     => s_s_avalon_wr, 
-      i_s_avalon_rd     => s_s_avalon_rd, 
+      o_s_avalon_rd     => s_s_avalon_rd, 
       --
       o_m_avalon_select => s_avalon_select, 
       o_m_avalon_wr     => s_m_avalon_wr, 
@@ -101,9 +111,9 @@ BEGIN
   --====================================================================
   --= avalon slave 
   --====================================================================
-  inst_slv: ENTITY WORK.vunit_lib.avalon_slave 
+  inst_slv: ENTITY vunit_lib.avalon_slave 
     GENERIC MAP(
-      avalon_slave      => avalon_slave
+      avalon_slave      => c_avalon_slave
     )
     PORT MAP(
       clk               => i_clock, 
