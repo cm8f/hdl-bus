@@ -15,8 +15,8 @@ ENTITY uart_avalon_slave IS
     i_reset       : IN    STD_LOGIC;
     -- avalon
     i_avalon_select   : IN  STD_LOGIC;
-    i_avalon_wr       : IN  t_avalonf_slave_in;
-    o_avalon_rd       : OUT t_avalonf_slave_out;
+    i_avalon_wr       : IN  t_avalon_slave_in;
+    o_avalon_rd       : OUT t_avalon_slave_out;
     -- interface
     i_uart_rx         : IN  STD_LOGIC;
     o_uart_tx         : OUT STD_LOGIC;

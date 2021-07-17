@@ -11,8 +11,8 @@ ENTITY uart_bus_if IS
     i_clock         : IN  STD_LOGIC;
     i_reset         : IN  STD_LOGIC;
     i_avalon_select : IN  STD_LOGIC;
-    i_avalon_wr     : IN  t_avalonf_slave_in;
-    o_avalon_rd     : OUT t_avalonf_slave_out;
+    i_avalon_wr     : IN  t_avalon_slave_in;
+    o_avalon_rd     : OUT t_avalon_slave_out;
     -- 
     o_divider       : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
     --
@@ -38,8 +38,8 @@ ARCHITECTURE rtl OF uart_bus_if IS
   
   SIGNAL r_waitrequest          : STD_LOGIC := '0';
   SIGNAL s_waitrequest          : STD_LOGIC;
-  SIGNAL s_readdatavalid        : STD_LOGIC;
   SIGNAL s_readdata             : STD_LOGIC_VECTOR(31 DOWNTO 0);
+  SIGNAL r_readdata             : STD_LOGIC_VECTOR(31 DOWNTO 0);
 
 BEGIN
 
@@ -47,7 +47,6 @@ BEGIN
   BEGIN
     
     s_waitrequest   <= '0';
-    s_readdatavalid <= '0';
     s_readdata      <= x"DEADBEEF";
 
     s_asel_divider  <= '0';
@@ -60,32 +59,32 @@ BEGIN
       IF i_avalon_wr.address(t_uart_decoder'RANGE) = p_addr_uart_divider(t_uart_decoder'RANGE) THEN
         s_asel_divider      <= '1';
         s_readdata          <= STD_LOGIC_vECTOR(RESIZE(UNSIGNED(r_divider), 32));
-        s_readdatavalid     <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_uart_decoder'RANGE) = p_addr_uart_tx_data(t_uart_decoder'RANGE) THEN
         s_asel_txdata       <= '1';
-        s_readdatavalid     <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_uart_decoder'RANGE) = p_addr_uart_tx_stat(t_uart_decoder'RANGE) THEN
         s_asel_txstatus     <= '1';
         s_readdata          <= STD_LOGIC_VECTOR(RESIZE(UNSIGNED(i_txfifo_status), 32));
-        s_readdatavalid     <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_uart_decoder'RANGE) = p_addr_uart_rx_data(t_uart_decoder'RANGE) THEN
         s_asel_rxdata       <= '1';
+        s_waitrequest       <= '1';
         s_readdata          <= STD_LOGIC_VECTOR(RESIZE(UNSIGNED(i_rxfifo_data), 32));
-        s_readdatavalid     <= i_avalon_wr.read;
       END IF;
 
       IF i_avalon_wr.address(t_uart_decoder'RANGE) = p_addr_uart_rx_stat(t_uart_decoder'RANGE) THEN
         s_asel_rxstatus     <= '1';
         s_readdata          <= STD_LOGIC_VECTOR(RESIZE(UNSIGNED(i_rxfifo_status), 32));
-        s_readdatavalid     <= i_avalon_wr.read;
       END IF;
 
+    END IF;
+    --
+    IF i_avalon_select AND r_waitrequest THEN 
+      s_readdata <= r_readdata;
     END IF;
 
   END PROCESS;
@@ -93,13 +92,13 @@ BEGIN
 
 
   o_avalon_rd.readdata      <= s_readdata;
-  o_avalon_rd.readdatavalid <= s_readdatavalid;
   o_avalon_rd.waitrequest   <= s_waitrequest;
 
   proc_write: PROCESS(i_clock) 
   BEGIN
     IF RISING_EDGE(i_clock) THEN
 		  r_waitrequest       <= s_waitrequest;
+      r_readdata          <= s_readdata;
       --
       IF i_avalon_wr.write = '1' THEN
         IF s_asel_divider = '1' THEN
