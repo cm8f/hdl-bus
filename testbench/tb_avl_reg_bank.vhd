@@ -32,14 +32,17 @@ ARCHITECTURE tb OF tb_avl_gen_reg_bank IS
   SIGNAL i_clock      : STD_LOGIC;
   SIGNAL i_reset      : STD_LOGIC;
   SIGNAL i_avalon_select  : STD_LOGIC;
-  SIGNAL i_avalon_wr      : t_avalonf_slave_in;
-  SIGNAL o_avalon_rd      : t_avalonf_slave_out;
+  SIGNAL i_avalon_wr      : t_avalon_slave_in;
+  SIGNAL o_avalon_rd      : t_avalon_slave_out;
 
   SIGNAL i_reg_wrreq      : STD_LOGIC_VECTOR(c_registers-1 DOWNTO 0);
   SIGNAL i_reg_din        : t_slv32_matrix(c_registers-1 DOWNTO 0);
   SIGNAL o_reg_dout       : t_slv32_matrix(c_registers-1 DOWNTO 0);
   SIGNAL o_reg_valid      : STD_LOGIC_VECTOR(c_registers-1 DOWNTO 0);
 
+
+  SIGNAL s_dummy_byteena  : STD_LOGIC_VECTOR(3 DOWNTO 0);
+  SIGNAL s_dummyburstcount: STD_LOGIC_VECTOR(1 DOWNTO 0);
 
   CONSTANT master_logger    : logger_t := get_logger("master");
   CONSTANT tb_logger        : logger_t := get_logger("tb");
@@ -136,15 +139,16 @@ BEGIN
     PORT MAP(
       clk               => i_clock,
       address           => i_avalon_wr.address,
-      byteenable        => i_avalon_wr.byteenable,
-      burstcount        => i_avalon_wr.burstcount,
+      byteenable        => s_dummy_byteena,
+      burstcount        => s_dummyburstcount,
       write             => i_avalon_wr.write,
       writedata         => i_avalon_wr.writedata,
       read              => i_avalon_wr.read,
       readdata          => o_avalon_rd.readdata,
-      readdatavalid     => o_avalon_rd.readdatavalid,
+      readdatavalid     => (i_avalon_wr.read AND NOT o_avalon_rd.waitrequest),
       waitrequest       => o_avalon_rd.waitrequest
     );
+
 
 
 

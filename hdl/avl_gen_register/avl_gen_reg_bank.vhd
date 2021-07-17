@@ -16,8 +16,8 @@ ENTITY avl_gen_reg_bank IS
     i_reset           : IN  STD_LOGIC;
     --
     i_avalon_select   : IN  STD_LOGIC;
-    i_avalon_wr       : IN  t_avalonf_slave_in;
-    o_avalon_rd       : OUT t_avalonf_slave_out;
+    i_avalon_wr       : IN  t_avalon_slave_in;
+    o_avalon_rd       : OUT t_avalon_slave_out;
     --
     i_reg_wrreq       : IN  STD_LOGIC_VECTOR(g_registers-1 DOWNTO 0)    := (OTHERS => '0');
     i_reg_din         : IN  t_slv32_matrix(g_registers-1 DOWNTO 0)      := (OTHERS => (OTHERS => '0'));
@@ -30,8 +30,6 @@ ARCHITECTURE rtl OF avl_gen_reg_bank IS
 
   SIGNAL s_waitrequest  : STD_LOGIC;
   SIGNAL r_waitrequest  : STD_LOGIC;
-  SIGNAL s_readdatavalid  : STD_LOGIC;
-  SIGNAL r_readdatavalid  : STD_LOGIC;
   SIGNAL s_readdata       : STD_LOGIC_VECTOR(o_avalon_rd.readdata'RANGE);
   SIGNAL r_readdata       : STD_LOGIC_VECTOR(o_avalon_rd.readdata'RANGE);
 
@@ -46,13 +44,11 @@ BEGIN
   proc_decoder : PROCESS(ALL)
   BEGIN
     s_waitrequest       <= '0';
-    s_readdatavalid     <= '0';
     s_readdata          <=  c_avalonf_slave_out_init.readdata;
     s_aselect           <= (OTHERS => '0');
 
     IF i_avalon_select AND NOT r_waitrequest THEN
       s_aselect(s_reg_addr)  <= '1';
-      s_readdatavalid   <= i_avalon_wr.read;
       s_readdata        <= r_registers(s_reg_addr);
     END IF;
   END PROCESS;
@@ -63,12 +59,8 @@ BEGIN
   BEGIN
     IF RISING_EDGE(i_clock) THEN
       r_waitrequest <= '0';
-      r_readdatavalid     <= '0';
       IF i_avalon_wr.read OR i_avalon_wr.write THEN
         r_waitrequest       <= s_waitrequest;
-      END IF;
-      IF i_avalon_wr.read THEN
-        r_readdatavalid     <= s_readdatavalid;
       END IF;
       r_readdata          <= s_readdata;
     END IF;
@@ -96,8 +88,7 @@ BEGIN
 
 
 
-  o_avalon_rd.readdata      <= r_readdata;
-  o_avalon_rd.readdatavalid <= r_readdatavalid;
+  o_avalon_rd.readdata      <= s_readdata;
   o_avalon_rd.waitrequest   <= s_waitrequest;
 
   o_reg_dout <= r_registers;
