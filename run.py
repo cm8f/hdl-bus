@@ -24,7 +24,7 @@ def create_test_suite(prj, args):
     lib.add_source_files(join(root, "./testbench/*.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/ram/hdl/ram_tdp.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/ram/hdl/ram_sdp.vhd"))
-    lib.add_source_files(join(root, "./external/hdl-base/fifo/hdl/fifo_sc_mixed.vhd"))
+    lib.add_source_files(join(root, "./external/hdl-base/fifo/hdl/fifo_sc_single.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/uart/hdl/uart_tx.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/uart/hdl/uart_rx.vhd"))
     lib.add_source_files(join(root, "./external/hdl-base/uart/hdl/uart_wrapper_top.vhd"))

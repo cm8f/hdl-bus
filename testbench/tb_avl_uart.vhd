@@ -24,11 +24,16 @@ ARCHITECTURE tb OF tb_avl_uart IS
 
   SIGNAL i_clock        : STD_LOGIC;
   SIGNAL i_reset        : STD_LOGIC := '1';
-  SIGNAL i_avalon_wr    : t_avalonf_slave_in;
-  SIGNAL o_avalon_rd    : t_avalonf_slave_out;
+  SIGNAL i_avalon_wr    : t_avalon_slave_in;
+  SIGNAL o_avalon_rd    : t_avalon_slave_out;
 
   SIGNAL o_uart_tx          : STD_LOGIC;
   SIGNAL i_uart_rx          : STD_LOGIC;
+  SIGNAL o_irq_rx_eop       : STD_LOGIC;
+
+  SIGNAL s_byteenable : STD_LOGIC_VECTOR(3 DOWNTO 0);
+  SIGNAL s_burstcount : STD_LOGIC_VECTOR(1 DOWNTO 0);
+  SIGNAL r_readdatavalid : STD_LOGIC;
 
   CONSTANT c_period         : TIME      := 20 ns;
   CONSTANT c_uart_divider : INTEGER := 50000000/g_baud;
@@ -76,7 +81,7 @@ BEGIN
 
         -- write data
         v_addr(7 DOWNTO 0)              := x"04";
-        FOR I IN 32 TO 126 LOOP
+        FOR I IN 32 TO 127 LOOP
           Log(id, "write data " & to_string(i));
           v_data                         := STD_LOGIC_VECTOR(TO_UNSIGNED(I, 32));
           write_bus(net, bus_handle, v_addr, v_data);
@@ -91,15 +96,17 @@ BEGIN
         v_data   := STD_LOGIC_VECTOR(TO_UNSIGNED(13, 32));
         write_bus(net, bus_handle, v_addr, v_data);
 
-        
-        WAIT FOR 240 ms;
+        Log(id, " wait for irq");
+        WaitForLevel(o_irq_rx_eop, '1');
+        Log(id, " irq received");
 
         -- READ 
         v_addr(7 DOWNTO 0) := x"0C";
-        FOR I IN 32 TO 126 LOOP
+        FOR I IN 32 TO 127 LOOP
+          Log(id, " read from fifo");
           read_bus(net, bus_handle, v_addr, v_data);
-          AffirmIf(id, TO_INTEGER(UNSIGNED(v_data(7 DOWNTO 0))) = I, "uart received unexpected character (received - expected): " 
-            & TO_STRING(TO_INTEGER(UNSIGNED(v_data(7 DOWNTO 0)))) & " - " & TO_STRING(I), ERROR); 
+          AffirmIfEqual(id, TO_INTEGER(UNSIGNED(v_data(7 DOWNTO 0))), I, "unexpected character " );
+          WaitForClock(i_clock, 4);
         END LOOP;
       END IF;
 
@@ -110,6 +117,7 @@ BEGIN
     TranscriptClose;
     test_runner_cleanup(runner);
   END PROCESS;
+  test_runner_watchdog(runner, 2000 ms);
 
 
 
@@ -125,15 +133,24 @@ BEGIN
     PORT MAP(
       clk               => i_clock,
       address           => i_avalon_wr.address,
-      byteenable        => i_avalon_wr.byteenable,
-      burstcount        => i_avalon_wr.burstcount,
+      byteenable        => s_byteenable,
+      burstcount        => s_burstcount,
       write             => i_avalon_wr.write,
       writedata         => i_avalon_wr.writedata,
       read              => i_avalon_wr.read,
       readdata          => o_avalon_rd.readdata,
-      readdatavalid     => o_avalon_rd.readdatavalid,
+      readdatavalid     => r_readdatavalid,
       waitrequest       => o_avalon_rd.waitrequest
     );
+
+
+
+  PROCESS(i_clock)
+  BEGIN
+    IF RISING_EDGE(I_CLOCK) THEN 
+      r_readdatavalid <= i_avalon_wr.read AND o_avalon_rd.waitrequest;
+    END IF;
+  END PROCESS;
 
 
 
@@ -148,12 +165,15 @@ BEGIN
     i_clock     => i_clock,
     i_reset     => i_reset,
     --
-    i_avalon_select => '1',
+    i_avalon_select => (i_avalon_wr.read OR i_avalon_wr.write),
     i_avalon_wr     => i_avalon_wr,
     o_avalon_rd     => o_avalon_rd,
     --
     i_uart_rx       => i_uart_rx,
-    o_uart_tx       => o_uart_tx
+    o_uart_tx       => o_uart_tx,
+    --
+    o_irq_rx_eop    => o_irq_rx_eop
+
   );
 
   i_uart_rx <= o_uart_tx;
