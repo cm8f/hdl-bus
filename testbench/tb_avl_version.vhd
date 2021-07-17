@@ -27,9 +27,12 @@ ARCHITECTURE rtl OF tb_avl_version IS
   SIGNAL i_clock              : STD_LOGIC := '0';
   SIGNAL i_reset              : STD_LOGIC := '0';
         
-  SIGNAL i_avalon_wr          : t_avalonf_slave_in;
-  SIGNAL o_avalon_rd          : t_avalonf_slave_out;
+  SIGNAL i_avalon_wr          : t_avalon_slave_in;
+  SIGNAL o_avalon_rd          : t_avalon_slave_out;
   SIGNAL i_avalon_select      : STD_LOGIC := '1';
+  SIGNAL s_byteenable         : STD_LOGIC_VECTOR(3 DOWNTO 0);
+  SIGNAL s_burstcount         : STD_LOGIC_VECTOR(1 DOWNTO 0);
+  SIGNAL r_readvalid          : STD_LOGIC;
   
   SIGNAL id                   : AlertLogIDType;
   CONSTANT master_logger      : logger_t := get_logger("master");
@@ -120,15 +123,23 @@ BEGIN
     PORT MAP(
       clk               => i_clock,
       address           => i_avalon_wr.address,
-      byteenable        => i_avalon_wr.byteenable,
-      burstcount        => i_avalon_wr.burstcount,
+      byteenable        => s_byteenable,
+      burstcount        => s_burstcount,
       write             => i_avalon_wr.write,
       writedata         => i_avalon_wr.writedata,
       read              => i_avalon_wr.read,
       readdata          => o_avalon_rd.readdata,
-      readdatavalid     => o_avalon_rd.readdatavalid,
+      readdatavalid     => r_readvalid,
       waitrequest       => o_avalon_rd.waitrequest
     );
+
+  PROCESS(i_clock)
+  BEGIN
+    IF RISING_EDGE(i_clock) THEN
+      r_readvalid <= i_avalon_wr.read AND NOT o_avalon_rd.waitrequest;
+    END IF;
+  END PROCESS;
+
 
 
   --====================================================================
